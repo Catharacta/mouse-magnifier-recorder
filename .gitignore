@@ -1,0 +1,6 @@
+node_modules/
+dist/
+*.webm
+*.json
+.DS_Store
+.env
