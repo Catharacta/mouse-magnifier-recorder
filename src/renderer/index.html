@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mouse Magnifier Recorder - PoC</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Mouse Magnifier Recorder</h1>
+        
+        <div class="controls">
+            <button id="start-btn">録画開始</button>
+            <button id="stop-btn" disabled>録画停止</button>
+        </div>
+
+        <div id="sources-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>キャプチャソースを選択</h2>
+                <div id="sources-list"></div>
+                <button id="close-modal-btn">キャンセル</button>
+            </div>
+        </div>
+
+        <div id="hud" class="hud hidden">
+            <div class="hud-item">REC</div>
+            <div class="hud-item" id="hud-timer">00:00</div>
+            <div class="hud-item" id="hud-scale">Zoom: 1.0x</div>
+        </div>
+
+        <div class="preview-container">
+            <video id="preview" autoplay muted></video>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>
