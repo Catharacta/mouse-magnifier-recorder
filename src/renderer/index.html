@@ -4,71 +4,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mouse Magnifier Recorder - PoC</title>
+    <title>Mouse Magnifier Recorder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
-    <div class="container">
-        <h1>Mouse Magnifier Recorder</h1>
+<body class="transparent-body">
+    <!-- 1. 範囲選択オーバーレイ (初期は非表示) -->
+    <div id="selection-layer" class="hidden">
+        <canvas id="selection-canvas"></canvas>
+        <div id="countdown-overlay" class="hidden">
+            <div id="countdown-number">3</div>
+            <div class="countdown-label">READY</div>
+        </div>
+        <div id="pre-record-dialog" class="hidden">
+            <button id="start-record-btn" class="btn primary">録画開始 (3秒カウントダウン)</button>
+            <button id="cancel-selection-btn" class="btn danger">キャンセル</button>
+        </div>
+        <div class="instruction">
+            ドラッグして録画範囲を選択してください<br>
+            (Esc: キャンセル)
+        </div>
+    </div>
 
-        <div id="recording-section">
-            <div class="controls">
-                <button id="start-btn">録画開始</button>
-                <button id="stop-btn" disabled>録画停止</button>
-            </div>
-            <div class="preview-container">
-                <video id="preview" autoplay muted></video>
+    <!-- 2. 録画中HUD (マウス透過中に表示) -->
+    <div id="recording-hud" class="hidden">
+        <div class="hud-content">
+            <span class="recording-dot">●</span>
+            <span id="hud-timer">00:00</span>
+            <span id="hud-scale">Zoom: 1.0x</span>
+            <span class="shortcut-hint">(Ctrl+Shift+Rで停止)</span>
+        </div>
+    </div>
+
+    <!-- 3. エディタ画面 (録画終了後に表示) -->
+    <div id="editor-section" class="hidden">
+        <div class="editor-header">
+            <h1>Editor</h1>
+            <div class="window-controls">
+                <!-- 自前ウィンドウコントロールがあればここに -->
             </div>
         </div>
+        <div class="editor-layout">
+            <div class="preview-panel">
+                <canvas id="editor-canvas" width="1280" height="720"></canvas>
+                <div class="canvas-controls">
+                    <button id="play-pause-btn" class="btn">再生</button>
+                    <span id="current-time">00:00 / 00:00</span>
+                </div>
+            </div>
+            <div class="side-panel">
+                <h3>ズームイベント</h3>
+                <div id="event-list" class="timeline"></div>
 
-        <div id="editor-section" class="hidden">
-            <div class="editor-layout">
-                <div class="preview-panel">
-                    <canvas id="editor-canvas" width="1920" height="1080"></canvas>
-                    <div class="canvas-controls">
-                        <button id="play-pause-btn">再生</button>
-                        <span id="current-time">00:00 / 00:00</span>
+                <div id="event-editor" class="property-panel hidden">
+                    <h4>編集</h4>
+                    <div class="prop-row">
+                        <label>時間</label>
+                        <input type="number" id="prop-time" step="100">
+                    </div>
+                    <div class="prop-row">
+                        <label>倍率</label>
+                        <input type="number" id="prop-scale" step="0.1" min="1.0" max="5.0">
+                    </div>
+                    <div class="prop-row">
+                        <label>X</label>
+                        <input type="number" id="prop-x">
+                        <label>Y</label>
+                        <input type="number" id="prop-y">
+                    </div>
+                    <div class="btn-group">
+                        <button id="save-event-btn" class="btn primary">反映</button>
+                        <button id="delete-event-btn" class="btn danger">削除</button>
                     </div>
                 </div>
-                <div class="side-panel">
-                    <h3>ズームイベント</h3>
-                    <div id="event-list" class="timeline"></div>
-                    <div id="event-editor" class="property-panel hidden">
-                        <h4>イベント編集</h4>
-                        <div class="prop">
-                            <label>時間 (ms)</label>
-                            <input type="number" id="prop-time">
-                        </div>
-                        <div class="prop">
-                            <label>倍率</label>
-                            <input type="number" id="prop-scale" step="0.1" min="1.0" max="5.0">
-                        </div>
-                        <div class="prop">
-                            <label>座標 X</label>
-                            <input type="number" id="prop-x">
-                        </div>
-                        <div class="prop">
-                            <label>座標 Y</label>
-                            <input type="number" id="prop-y">
-                        </div>
-                        <button id="save-event-btn">反映</button>
-                        <button id="delete-event-btn">削除</button>
-                    </div>
-                    <div class="export-panel">
-                        <button id="export-btn">エクスポート (WebM)</button>
-                        <div id="export-progress-container" class="hidden">
+
+                <div class="export-panel">
+                    <button id="discard-btn" class="btn danger"
+                        style="width: 100%; margin-bottom: 10px;">録画を破棄して閉じる</button>
+                    <button id="export-btn" class="btn accent">エクスポート (WebM)</button>
+                    <div id="export-progress-container" class="hidden">
+                        <div class="progress-bar">
                             <div id="export-progress"></div>
                         </div>
+                        <span id="export-status">Processing...</span>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div id="sources-modal" class="modal hidden">
-        </div>
-
-        <script src="index.js"></script>
+    <script src="index.js"></script>
 </body>
 
 </html>
